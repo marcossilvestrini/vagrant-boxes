@@ -1,8 +1,7 @@
 # ORACLE LINUX
 
-![OracleLinux](image not found!!!)
+![oracle_linux](https://user-images.githubusercontent.com/62715900/120249678-08762780-c252-11eb-8756-529136b9e546.png)
 
-```linux
 The Oracle Linux operating system is engineered for open cloud
 infrastructure. It delivers leading performance, scalability, reliability and
 security for enterprise SaaS and PaaS workloads as well as traditional
@@ -12,7 +11,7 @@ updates using Ksplice, additional management tools such as Oracle
 Enterprise Manager and lifetime support, all at a low cost. Unlike many other
 commercial Linux distributions, Oracle Linux is easy to download and
 completely free to use, distribute and update.
-```
+
 
 ## Authors
 
