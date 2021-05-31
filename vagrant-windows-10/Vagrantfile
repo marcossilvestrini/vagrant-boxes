@@ -12,23 +12,23 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vbguest.auto_update = true
 
   # VM CLIENT
-  config.vm.define "srv01" do |srv01|
+  config.vm.define "win10" do |win10|
 
     # VARIABLE HOSTNAME
-    VM_CLIENT_NAME= "srv01"
+    VM_CLIENT_NAME= "win10-srv01"
 
     # HOSTNAME
-    srv01.vm.hostname = VM_CLIENT_NAME
+    win10.vm.hostname = VM_CLIENT_NAME
 
     # NETWORK
-    srv01.vm.network "public_network" ,ip: "192.168.0.143"
+    win10.vm.network "public_network" ,ip: "192.168.0.143"
 
     # MOUNTS
-    srv01.vm.synced_folder ".", "/vagrant", disabled: true
-    srv01.vm.synced_folder "./scripts", "/scripts"
+    win10.vm.synced_folder ".", "/vagrant", disabled: true
+    win10.vm.synced_folder "./scripts", "/scripts"
 
     # PROVIDER
-    srv01.vm.provider "virtualbox" do |vb|
+    win10.vm.provider "virtualbox" do |vb|
       vb.linked_clone = true
       vb.name = VM_CLIENT_NAME
       vb.memory = 1024
@@ -38,13 +38,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # PROVISION
 
     # SETUP CHOCOLATEY
-    srv01.vm.provision "shell", path: "scripts/install_chocolatey.ps1"
+    win10.vm.provision "shell", path: "scripts/install_chocolatey.ps1"
 
     # SETUP ANSIBLE
-    srv01.vm.provision "shell", path: "scripts/setup_ansible.ps1"
+    win10.vm.provision "shell", path: "scripts/setup_ansible.ps1"
 
     # SETUP AD SERVER
-    # srv01.vm.provision "ansible" do |ansible|
+    # win10.vm.provision "ansible" do |ansible|
     #   ansible.limit = "all"
     #   ansible.inventory_path = "provisioning/hosts"
     #   ansible.playbook = "provisioning/client_server.yml"
