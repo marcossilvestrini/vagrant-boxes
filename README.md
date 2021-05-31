@@ -1,6 +1,6 @@
 # VAGRANT BOXES FOR PROJECTS
 
-![Vagrant](http://i.imgur.com/RnlvjUO.png)](https://www.vagrantup.com)
+![Vagrant](http://i.imgur.com/RnlvjUO.png)
 
 ## Authors
 
