@@ -1,0 +1,2 @@
+rsync -avzh --exclude=.vagrant --exclude=.git --progress /mnt/projects/vagrant-windows-10/ /home/marcos.silvestrini/vagrant-windows-10
+ansible -i provisioning/hosts/ srvdc01 win_ping  --private-key .vagrant/machines/srvdc01/virtualbox/private_key -u vagrant
