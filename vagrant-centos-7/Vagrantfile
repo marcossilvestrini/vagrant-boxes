@@ -10,11 +10,45 @@ unless Vagrant.has_plugin?("vagrant-reload")
   system('vagrant plugin install vagrant-reload')
 end
 
+# INSTALL PLUGIN VBGuest
+unless Vagrant.has_plugin?("vagrant-vbguest")
+  puts 'Installing vagrant-vbguest Plugin...'
+  system('vagrant plugin install vagrant-vbguest')
+end
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "centos/7"
 
+
   # VM centos7
   config.vm.define "centos7"  do |centos7|
+
+    # Begin Fix error  VirtualBox shared folders
+    class Foo < VagrantVbguest::Installers::CentOS
+      def has_rel_repo?
+        unless instance_variable_defined?(:@has_rel_repo)
+          rel = release_version
+          @has_rel_repo = communicate.test("yum repolist")
+        end
+        @has_rel_repo
+      end
+
+      def install_kernel_devel(opts=nil, &block)
+        cmd = "yum update kernel -y"
+        communicate.sudo(cmd, opts, &block)
+
+        cmd = "yum install -y kernel-devel"
+        communicate.sudo(cmd, opts, &block)
+
+        cmd = "shutdown -r now"
+        communicate.sudo(cmd, opts, &block)
+        begin
+          sleep 5
+        end until @vm.communicate.ready?
+      end
+    end
+    centos7.vbguest.installer = Foo
+    # End Fix
 
     # VARIABLE HOSTNAME
     APP_NAME= "centos-serv01"
@@ -31,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # MOUNTS
     centos7.vm.synced_folder ".", "/vagrant", disabled: true
-    centos7.vm.synced_folder "./security", "/security"
+    centos7.vm.synced_folder "./security", "/security",type: "virtualbox"
 
     # PROVIDER
     centos7.vm.provider "virtualbox" do |vb|
@@ -47,10 +81,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       cat /security/id_rsa.pub >> .ssh/authorized_keys
     SHELL
 
-    # # PACKAGES FOR PROVISION
-    # centos7.vm.provision "shell", inline: <<-SHELL
-    #   dnf install python3 -y
-    # SHELL
+    # PACKAGES FOR PROVISION
+    centos7.vm.provision "shell", inline: <<-SHELL
+      yum install  xorg-x11-server-Xorg xorg-x11-xauth xorg-x11-apps -y
+    SHELL
 
   end
 

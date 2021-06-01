@@ -10,6 +10,12 @@ unless Vagrant.has_plugin?("vagrant-reload")
   system('vagrant plugin install vagrant-reload')
 end
 
+# INSTALL PLUGIN VBGuest
+unless Vagrant.has_plugin?("vagrant-vbguest")
+  puts 'Installing vagrant-vbguest Plugin...'
+  system('vagrant plugin install vagrant-vbguest')
+end
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "centos/8"
 
@@ -59,7 +65,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # MOUNTS
     centos8.vm.synced_folder ".", "/vagrant", disabled: true
-    centos8.vm.synced_folder "./security", "/security"
+    centos8.vm.synced_folder "./security", "/security",type: "virtualbox"
+
 
     # PROVIDER
     centos8.vm.provider "virtualbox" do |vb|

@@ -3,6 +3,7 @@
 
 #ignore files general
 **/.vscode
+**/*workspace.code*
 **/.log
 **/.vagrant
 

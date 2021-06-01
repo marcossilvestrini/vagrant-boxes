@@ -1,0 +1,2 @@
+#!/bin/bash
+rsync -avzh --exclude=.vagrant --exclude=.git --progress /mnt/projects/vagrant-boxes/vagrant-centos-7/ /home/marcos.silvestrini/vagrant-centos-7
