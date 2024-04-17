@@ -1,0 +1,33 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+unless Vagrant.has_plugin?("vagrant-reload")
+  puts 'Installing vagrant-reload Plugin...'
+  system('vagrant plugin install vagrant-reload')
+end
+
+# INSTALL PLUGIN VBguest
+unless Vagrant.has_plugin?("vagrant-vbguest")
+  puts 'Installing vagrant-vbguest Plugin...'
+  system('vagrant plugin install vagrant-vbguest')
+end
+
+# INSTALL PLUGIN DISKSIZE
+unless Vagrant.has_plugin?("vagrant-disksize")
+  puts 'Installing vagrant-disksize Plugin...'
+  system('vagrant plugin install vagrant-disksize')
+end
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "silvestrini-ol9"  
+  config.vm.box_download_insecure=true  
+  config.ssh.insert_key = false    
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder "../../configs/linux/", "/home/vagrant/configs"
+  config.vm.synced_folder "../../scripts/linux", "/home/vagrant/scripts"
+  config.vm.synced_folder "../../security", "/home/vagrant/security"
+  config.vm.provider "virtualbox" do |vb| 
+      vb.name = "silvestrini-ol9-lb" 
+  end  
+  config.vm.provision "shell", name: "[SCRIPT USERDATA-LOAD-BALANCE.SH]", path: "../../scripts/linux/load-balance/userdata-load-balance.sh"
+end

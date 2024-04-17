@@ -1,0 +1,39 @@
+# vagrant
+**/*.vagrant
+**/*.box
+
+#logs
+**/*.log
+
+#security
+**/authorized_keys
+**/*.pub
+**/*.ppk
+**/*private.key*
+**/*ecdsa*
+**/*.pem*
+**/*.p12*
+!security/README.md
+
+#Apps
+*.exe
+
+#Slack
+slack/silvestrini.py
+*__pycache__*
+
+# Vscode
+*workspace.code-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+**/*.vdi
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix

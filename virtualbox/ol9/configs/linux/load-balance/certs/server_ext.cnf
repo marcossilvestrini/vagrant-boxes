@@ -1,0 +1,11 @@
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth, clientAuth
+subjectAltName = @alt_names
+
+[alt_names]
+IP.1 = 192.168.0.131
+DNS.1 = infra-server01.skynet.com.br
+DNS.2 = 1.1.1.1
+DNS.3 = 8.8.8.8

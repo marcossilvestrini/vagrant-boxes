@@ -1,0 +1,35 @@
+$TTL 1h
+
+@                   IN      SOA     infra-server01.skynet.com.br.   vagrant.skynet.com.br. (
+                            01                      ; serial
+                            28800                   ; refresh (8h)
+                            7200                    ; retry (2h)
+                            604800                  ; expire (7d)
+                            3600                    ; negative caching (1h)
+)
+
+
+@                   IN      NS      infra-server01.skynet.com.br.                                                           
+                            MX      5       mail                            
+
+infra-server01              A       192.168.0.130   ;glue record,dns master
+load-balance                A       192.168.0.131   ;rancher load balance
+control-plane01             A       192.168.0.140   ;rancher control plane 1
+control-plane02             A       192.168.0.141   ;rancher control plane 2
+control-plane03             A       192.168.0.142   ;rancher control plane 3
+worker01                    A       192.168.0.143   ;rancher worker 1
+worker02                    A       192.168.0.144   ;rancher worker 2
+worker03                    A       192.168.0.145   ;rancher worker 3
+win-silvestrini             A       192.168.0.100   ;my desktop
+win-silvestrini2            A       192.168.0.101   ;my notebook
+skynet                   A       192.168.0.102   ;skynet notebook
+mail                        A       192.168.0.130   ;mail
+ftp                         CNAME   infra-server01  ;ftp
+rancher                     CNAME   load-balance    ;rancher endpoint
+argocd                      CNAME   load-balance    ;argocd endpoint
+gitlab                      CNAME   load-balance    ;gitlab endpoint
+app-silvestrini             CNAME   load-balance    ;app-silvestrini load balance
+
+@                   IN      TXT     "skynet - The Company for crazy people!!!"
+
+skynet.com.br. IN DNSKEY 256 3 13 qzYHNPMPd6QjO66oHI4RL95LBSb3wRuEGJSXgByHJalof0DBJOucDKE1 MMudvv7eNoOabO+m91rQKUbRw6n/Vg==

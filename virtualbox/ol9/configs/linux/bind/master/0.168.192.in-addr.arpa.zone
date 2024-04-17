@@ -1,0 +1,24 @@
+$TTL 1h
+
+@                   IN      SOA     infra-server01.skynet.com.br.   admin.skynet.com.br. (
+                    01      ; serial
+                    28800   ; refresh (8h)
+                    7200    ; retry (2h)
+                    604800  ; expire (7d)
+                    3600    ; negative caching (1h)
+)
+
+                    NS      infra-server01.skynet.com.br. ;primary nameserver                    
+
+1                   PTR     router.skynet.com.br.
+100                 PTR     win-silvestrini.skynet.com.br.
+101                 PTR     win-silvestrini2.skynet.com.br.
+102                 PTR     skynet.skynet.com.br.
+130                 PTR     infra-server01.skynet.com.br.
+131                 PTR     load-balance.skynet.com.br.
+140                 PTR     control-plane01.skynet.com.br.
+141                 PTR     control-plane02.skynet.com.br.
+142                 PTR     control-plane03.skynet.com.br.
+143                 PTR     worker01.skynet.com.br.
+144                 PTR     worker02.skynet.com.br.
+145                 PTR     worker03.skynet.com.br.

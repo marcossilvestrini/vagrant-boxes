@@ -1,0 +1,23 @@
+
+debug: true
+server: https://control-plane01.skynet.com.br:9345
+token: tokenNode
+write-kubeconfig-mode: "0644"
+tls-san:  
+  - "rancher.skynet.com.br"
+  - "192.168.0.131"
+  - "control-plane01.skynet.com.br"
+  - "192.168.0.140"
+  - "control-plane02.skynet.com.br"
+  - "192.168.0.141"
+  - "control-plane03.skynet.com.br"
+  - "192.168.0.142"
+node-ip: ipNode
+#node-external-ip: 192.168.0.131
+bind-address: ipNode
+advertise-address: ipNode
+etcd-expose-metrics: true
+cni:
+  - canal
+node-taint:
+  - "CriticalAddonsOnly=true:NoExecute"

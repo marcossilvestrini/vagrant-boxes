@@ -1,0 +1,164 @@
+- name: Find all files in a directory
+  find:
+    paths: /home/vagrant/
+  register: found_files
+
+- name: Find files with DOS line-endings
+  shell: grep -l $'\r' "{{ item.path }}"
+  register: dos_files
+  with_items: "{{ found_files.files }}"
+  failed_when: false
+  changed_when: false
+
+- name: Execute dos2unix on found files
+  command: dos2unix "{{ item.item.path }}"
+  when: item.stdout != ""
+  with_items: "{{ dos_files.results }}"
+
+- name: Change permissions of .sh files
+  find:
+    paths: /home/vagrant
+    patterns: "*.sh"
+  register: sh_files
+
+- name: Set execute permission on .sh files
+  file:
+    path: "{{ item.path }}"
+    mode: "u+x"
+  loop: "{{ sh_files.files }}"
+
+- name: Set password for vagrant user
+  user:
+    name: root
+    password: "{{ password }}"  # Replace with your encrypted password
+
+- name: Set password for root user
+  user:
+    name: root
+    password: "{{ password }}"  # Replace with your encrypted password
+  
+- name: Ensure EPEL repository is installed
+  dnf:
+    name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
+    state: present
+
+- name: Install Commons Packages
+  dnf:
+    name: "{{ item }}"
+    state: latest
+  loop:
+    - "{{ packages }}"
+  no_log: true
+
+- name: Set /etc/profile
+  copy:
+    src: profile-ol9
+    dest: /etc/profile
+    mode: "0644"
+
+- name: Set /home/vagrant/.vimrc
+  copy:
+    src: .vimrc
+    dest: /home/vagrant
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+
+- name: Set /home/vagrant/.bashrc
+  copy:
+    src: .bashrc-ol9
+    dest: /home/vagrant/.bashrc
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: "0644"
+
+- name: Set /root/.bashrc
+  copy:
+    src: .bashrc-ol9
+    dest: /root/.bashrc
+    mode: "0644"
+
+- name: Enabling IP forwarding on Linux [/etc/sysctl.conf]
+  copy:
+    src: sysctl.conf
+    dest: /etc
+    mode: "0644"
+
+- name: Reload systemd manager configuration
+  command: systemctl daemon-reload
+
+- name: Check if /etc/ssh/sshd_config.d/50-redhat.conf exists
+  stat:
+    path: /etc/ssh/sshd_config.d/50-redhat.conf
+  register: sshd_config_check
+  ignore_errors: true
+
+- name: Remove /etc/ssh/sshd_config.d/50-redhat.conf if it exists
+  file:
+    path: /etc/ssh/sshd_config.d/50-redhat.conf
+    state: absent
+  when: sshd_config_check.stat.exists | bool
+
+- name: Copy 01-sshd-custom.conf to /etc/ssh/sshd_config.d/
+  copy:
+    src: 01-sshd-custom.conf
+    dest: /etc/ssh/sshd_config.d/01-sshd-custom.conf
+    mode: "0644"
+
+- name: Set permissions on 01-sshd-custom.conf
+  file:
+    path: /etc/ssh/sshd_config.d/01-sshd-custom.conf
+    mode: "0644"
+
+- name: Restart SSH service
+  service:
+    name: sshd
+    state: restarted
+
+- name: Stop and disable firewalld service
+  service:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Set SELinux to Permissive mode
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: Check if public key exists
+  command: grep -q "{{ public_key }}" /home/vagrant/.ssh/authorized_keys
+  register: key_check
+  failed_when: false
+  changed_when: false
+
+- name: Add public key to authorized_keys
+  lineinfile:
+    path: /home/vagrant/.ssh/authorized_keys
+    line: "{{ public_key }}"
+  when: key_check.rc != 0
+
+- name: Set ol9_codeready_builder repository to enabled
+  command: dnf config-manager --set-enabled ol9_codeready_builder
+  ignore_errors: true  # Use ignore_errors to continue even if the repository is already enabled
+
+- name: Update package cache
+  dnf:
+    name: "*"
+    state: latest  
+
+- name: Install X11 packages  
+  dnf:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - xorg-x11-server-Xorg.x86_64
+    - xorg-x11-xauth.x86_64
+    - xorg-x11-server-utils.x86_64
+    - xorg-x11-utils.x86_64
+
+- name: Copy sysstat configuration file
+  copy:
+    src: sysstat
+    dest: /etc/default/sysstat
+   

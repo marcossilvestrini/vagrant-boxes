@@ -1,0 +1,121 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Require for create disks
+require "fileutils"
+
+# INSTALAÇÃO DE PLUGINS NECESSÁRIOS
+required_plugins = ["vagrant-vmware-desktop", "vagrant-reload", "vagrant-vbguest", "vagrant-disksize"]
+required_plugins.each do |plugin|
+  unless Vagrant.has_plugin?(plugin)
+    system "vagrant plugin install #{plugin}"
+    puts "Installed the #{plugin} plugin."
+  end
+end
+
+# VARIÁVEIS GLOBAIS
+VDISKMANAGER = "E:\\Apps\\VMWare\\vmware-vdiskmanager.exe"
+VM_NAME = "silvestrini-rocky9"
+VAGRANT_STORAGE = "E:\\Servers\\VMWare\\Storage\\#{VM_NAME}"
+
+# CONFIGURAÇÃO DOS DISCOS ADICIONAIS
+ADDITIONAL_DISKS = [
+  { filename: "#{VM_NAME}-disk1.vmdk", size_gb: 100 },
+# Adicione mais discos conforme necessário
+]
+
+# DEFINIÇÃO DA MÁQUINA VIRTUAL
+Vagrant.configure("2") do |config|
+  # CONFIGURAÇÃO DA BOX
+  config.vm.box = "generic/rocky9"
+  config.vm.box_download_insecure = true
+
+  # CONFIGURAÇÕES GLOBAIS
+  config.ssh.insert_key = false
+  #config.vm.disk :disk, name: "system", size: "200GB", primary: true
+
+  # SHARED FOLDERS
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder "../../ansible", "/home/vagrant/ansible"
+  config.vm.synced_folder "../../configs/linux/", "/home/vagrant/configs"
+  config.vm.synced_folder "../../scripts/linux", "/home/vagrant/scripts"
+  config.vm.synced_folder "../../security", "/home/vagrant/security"
+
+  # CONFIGURAÇÃO DO PROVEDOR VMWARE
+  config.vm.provider "vmware_desktop" do |vm|
+    vm.vmx["virtualHW.version"] = "10"
+    vm.linked_clone = false
+    vm.whitelist_verified = true
+    #vm.gui = true
+    vm.vmx["allowNested"] = "true"
+    vm.utility_certificate_path = "C:\\ProgramData\\HashiCorp\\vagrant-vmware-desktop\\certificates"
+    #vm.clone_directory = "E:\\Servers\\VMWare\\#{VM_NAME}"
+    vm.vmx["displayName"] = VM_NAME
+    vm.vmx["memsize"] = "2048"
+    vm.vmx["numvcpus"] = "2"
+    vm.vmx["cpuid.coresPerSocket"] = "1"
+
+    # Add for tests
+    vm.vmx["svga.graphicsMemoryKB"] = "262144"
+    vm.vmx["mks.enable3d"] = true
+    vm.vmx["virtualHW.productCompatibility"] = "hosted"
+  end
+
+  # # TRIGGER PARA CRIAR DISCOS ADICIONAIS ANTES DE INICIAR A VM
+  # config.trigger.before :up do |trigger|
+  #   trigger.name = "Create additional disks"
+  #   trigger.ruby do |env, machine|
+  #     dir = VAGRANT_STORAGE
+  #     unless File.directory?(dir)
+  #       FileUtils.mkdir_p dir
+  #     end
+  #     ADDITIONAL_DISKS.each do |disk|
+  #       file_to_disk = "#{dir}/#{disk[:filename]}"
+  #       unless File.exist?(file_to_disk)
+  #         `#{VDISKMANAGER} -c -s #{disk[:size_gb]}GB -a lsilogic -t 1 #{file_to_disk}`
+  #       end
+  #       machine.provider_config.vmx["scsi0:1.filename"] = file_to_disk
+  #       machine.provider_config.vmx["scsi0:1.present"] = "TRUE"
+  #       machine.provider_config.vmx["scsi0:1.redo"] = ""
+  #     end
+  #   end
+  # end
+
+  # # TRIGGER PARA LIMPAR DISCOS ADICIONAIS E O DIRETÓRIO APÓS DESTRUIR A VM
+  # config.trigger.after :destroy do |trigger|
+  #   trigger.name = "Cleanup additional disks and storage directory"
+  #   trigger.ruby do |env, machine|
+  #     dir = VAGRANT_STORAGE
+  #     additional_disk_files = ADDITIONAL_DISKS.map { |disk| "#{dir}/#{disk[:filename].split("-")[0]}" }
+
+  #     if Dir.exist?(dir) && (Dir.entries(dir) - [".", ".."] - additional_disk_files).empty?
+  #       Dir.rmdir(dir)
+  #     else
+  #       FileUtils.rm_rf(dir) # Forçar exclusão do diretório e de todo o seu conteúdo
+  #     end
+  #     # Remove o arquivo de registro das VMs do Vagrant do inventário do VMware Workstation
+  #     #inventory_file = File.expand_path("#{ENV["APPDATA"]}/VMware/inventory.vmls")
+  #     #File.delete(inventory_file) if File.exist?(inventory_file)
+  #   end
+  # end
+
+  # Format secondary disk
+  # config.vm.provision :shell, :inline => "set -x && " +
+  #                                        "mkdir -p /var/lib/mysql && " +
+  #                                        "grep -q sdb1 /proc/partitions || ( " +
+  #                                        "echo ',,83' | sfdisk -q -D /dev/sdb && " +
+  #                                        "mkfs.ext4 /dev/sdb1 " +
+  #                                        ") && " +
+  #                                        "grep -q sdb1 /etc/fstab || echo '/dev/sdb1 /var/lib/mysql ext4 defaults 0 0' >> /etc/fstab && " +
+  #                                        "grep -q /var/lib/mysql /proc/mounts || mount /var/lib/mysql"
+
+  # Ansible provisioning
+  config.vm.provision "ansible_local" do |ansible|
+    ansible.install_mode = "pip3"
+    ansible.compatibility_mode = "2.0"
+    ansible.limit = "all"
+    ansible.provisioning_path = "/home/vagrant/ansible"
+    ansible.inventory_path = "hosts"
+    ansible.playbook = "playbook.yaml"
+  end
+end

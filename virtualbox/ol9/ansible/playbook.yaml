@@ -1,0 +1,6 @@
+- name: Playbook for Build Vagrant Box silvestrini-ol9
+  hosts: localhost
+  become: true
+
+  roles:
+    - cloud-init

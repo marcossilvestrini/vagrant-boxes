@@ -1,0 +1,55 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+# User specific environment
+if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
+    PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+fi
+export PATH
+
+# # Fun Cowsay
+# COWS=(/usr/share/cowsay/cows/*)
+# RAND_COW=$(($RANDOM % $(ls /usr/share/cowsay/cows/*.cow | wc -l)))
+# cowsay -f ${COWS[$RAND_COW]} $(fortune -s)
+
+# Workdir
+cd /home/vagrant || exit 1
+
+# Set PS1
+export PS1="\[\e[31m\][\[\e[m\]\[\e[38;5;172m\]\u\[\e[m\]@\[\e[38;5;153m\]\h\[\e[m\] \[\e[38;5;214m\]\W\[\e[m\]\[\e[31m\]]\[\e[m\]\\$"
+
+# Timezone
+export TZ='America/Sao_Paulo'
+
+# Cluster variables
+NODE_MASTER="control-plane01"
+NODE_NAME=$(hostname)
+IP_NODE=$(hostname -i)
+export NODE_MASTER
+export NODE_NAME
+export IP_NODE    
+
+# Copy kubectl to the local user bin folder:
+if [ -d "/var/lib/rancher/rke2/bin" ]; then    
+    
+    # Add kubectl to the PATH variable on the first server:
+    export PATH=$PATH:/usr/local/bin:/opt/rke2/bin:/var/lib/rancher/rke2/bin
+    
+    # Export the kubeconfig file on the node servers:
+    export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+
+    # kubectl auto complete
+    source /usr/share/bash-completion/bash_completion
+    source <(kubectl completion bash)
+    command -v kubecolor >/dev/null 2>&1 && alias kubectl="kubecolor" && alias k=kubectl
+    complete -F __start_kubectl k    
+        
+    if [[ "$NODE_MASTER" == "$NODE_NAME" ]]; then        
+        cp /etc/rancher/rke2/rke2.yaml configs/kubectl
+        sed -i "s/https:\/\/192.168.0.140:6443/https:\/\/rancher.skynet.com.br:6443/g" configs/kubectl/rke2.yaml
+    fi
+fi

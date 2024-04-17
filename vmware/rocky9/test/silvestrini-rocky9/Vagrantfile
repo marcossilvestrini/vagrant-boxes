@@ -1,0 +1,29 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  config.vm.box = "silvestrini-rocky9"
+
+  # CONFIGURAÇÃO DO PROVEDOR VMWARE
+  config.vm.provider "vmware_workstation" do |vm|
+    vm.linked_clone = false
+    vm.vmx["virtualHW.version"] = "10"
+    vm.whitelist_verified = true
+    vm.vmx["displayName"] = "rocky9-test"
+    #vm.vmx["ethernet0.pcislotnumber"] = "160"
+  end
+  config.vm.network "public_network", ip: "192.168.0.130", netmask: "255.255.255.0", mode: "bridge", bridge: [
+                                        "Intel(R) I211 Gigabit Network Connection",
+                                        "MediaTek Wi-Fi 6 MT7921 Wireless LAN",
+                                      ]
+end

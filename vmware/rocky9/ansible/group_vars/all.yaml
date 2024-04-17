@@ -1,0 +1,5 @@
+# Infra
+user: vagrant
+password: $1$9SgAtVsz$qNu0.eW3VcsXvhmxi.T320
+public_key: ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAFKGREd5VTilnP19b40FAe9rv+02HW6e5U8BeRj/DPAARV6bK9jJ+ebCyE+7fkkaMTkOv/nmojMDOm5wJDz3TPXSAD66Cw4RVTn9Z9N5nYVP50mC27HLaRjkPhEUlM7NCqEfnh6zp2BpZmh9Wu57iAB7Qkcojryt082qDaUrVNXmdaoAA== marcos.silvestrini@silvestrini
+
